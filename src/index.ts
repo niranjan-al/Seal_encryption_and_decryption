@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import encryptionRoutes from './routes/encryptionroutes';
+import decryptionRoutes from './routes/decryptionroutes';
 
 // Load environment variables
 dotenv.config();
@@ -59,4 +60,22 @@ app.listen(PORT, () => {
   console.log(`🚀 Service ready at http://localhost:${PORT}`);
 });
 
+app.use('/api', decryptionRoutes);
+
+
+app.get('/', (_req, res) => {
+  res.send('Seal Decryption Service is running');
+});
+
+
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({
+    success: false,
+    decryptedData: null,
+    decryptedText: null,
+    error: 'Internal server error',
+    errorCode: null
+  });
+});
 export default app;
