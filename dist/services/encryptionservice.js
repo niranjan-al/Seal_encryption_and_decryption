@@ -4,18 +4,12 @@ exports.EncryptionService = void 0;
 const SealClient_1 = require("../config/SealClient");
 const SuiClient_1 = require("../config/SuiClient");
 const typeconversion_1 = require("../utilities/typeconversion");
-/**
- * Helper to concatenate two Uint8Arrays
- */
 function concatBytes(a, b) {
     const result = new Uint8Array(a.length + b.length);
     result.set(a, 0);
     result.set(b, a.length);
     return result;
 }
-/**
- * Generates random nonce bytes of specified length
- */
 function generateRandomNonce(length = 8) {
     const nonce = new Uint8Array(length);
     crypto.getRandomValues(nonce);
