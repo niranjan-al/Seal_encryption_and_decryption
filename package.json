@@ -1,0 +1,34 @@
+{
+  "name": "seal_intern",
+  "version": "1.0.0",
+  "description": "Sui Seal decryption service for internship project",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && node dist/index.js",
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["sui", "seal", "decryption", "blockchain"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+ 
+  
+  "dependencies": {
+    "@mysten/bcs": "^1.2.0",
+    "@mysten/seal": "^0.7.0",
+    "@mysten/sui": "^1.38.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "ts-node": "^10.9.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.13",
+    "@types/express": "^5.0.3",
+    "@types/node": "^20.0.0",
+    "nodemon": "^3.1.10",
+    "typescript": "^5.9.2"
+  }
+}
