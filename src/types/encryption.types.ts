@@ -9,9 +9,11 @@ export interface ApiResponse {
   encryptedDataHex?: string | null;
   key?: string | null;
   keyHex?: string | null;
+  policyIdHex?: string | null;
   error?: string | null;
   errorCode?: string | null;
 }
+
 
 export enum ErrorCodes {
   INVALID_INPUT = 'INVALID_INPUT',

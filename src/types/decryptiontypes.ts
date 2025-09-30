@@ -14,12 +14,12 @@ export interface ApiResponse {
   decryptedData?: string | null;
   decryptedDataHex?: string | null;
   decryptedText?: string | null;
-  error?: string | null;
-  errorCode?: string | null;
   timestamp?: string | null;
   ownerAddress?: string | null;
   allowlistObjectId?: string | null;
   processingTimeMs?: number | null;
+  error?: string | null;
+  errorCode?: string | null;
 }
 
 export enum ErrorCodes {
