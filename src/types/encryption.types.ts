@@ -5,10 +5,10 @@ export interface EncryptResult {
 
 export interface ApiResponse {
   success: boolean;
-  encryptedData?: string | null;
-  encryptedDataHex?: string | null;
-  key?: string | null;
-  keyHex?: string | null;
+  encryptedDataHex: string | null;
+  policyIdHex: string | null;
+  blobId?: string | null; 
+  blobAddress?: string | null; 
   error?: string | null;
   errorCode?: string | null;
 }

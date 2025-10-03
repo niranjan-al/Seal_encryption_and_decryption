@@ -1,25 +1,17 @@
 import { SealClient } from "@mysten/seal";
-import { suiClient } from "./SuiClient";
 import dotenv from "dotenv";
-
+import { suiClient } from "./SuiClient";
 dotenv.config();
-
-
-export const accessPolicyId = process.env.ACCESS_POLICY_ID!;
-
-const serverConfigs = [
-  {
-    objectId: process.env.KEY_SERVER_OBJECT_ID_1!,
-    weight: 1,
-  },
-  {
-    objectId: process.env.KEY_SERVER_OBJECT_ID_2!,
-    weight: 1,
-  },
+const serverObjectIds = [
+  process.env.KEY_SERVER_OBJECT_ID_1!,
+  process.env.KEY_SERVER_OBJECT_ID_2!,
 ];
-
 export const sealClient = new SealClient({
   suiClient,
-  serverConfigs,
-  verifyKeyServers: true,
+  serverConfigs: serverObjectIds.map((id) => ({
+    objectId: id,
+    weight: 1,
+  })),
+  verifyKeyServers: false,
+  timeout: 60_000,
 });

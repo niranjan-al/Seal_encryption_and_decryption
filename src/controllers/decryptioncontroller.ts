@@ -1,3 +1,4 @@
+// src/controllers/decryptioncontroller.ts
 import { Request, Response } from "express";
 import { DecryptionService } from "../services/decryptionservice";
 import { ApiResponse, ErrorCodes, DecryptionError } from "../types/decryptiontypes";
@@ -14,9 +15,16 @@ export class DecryptionController {
     const start = Date.now();
 
     try {
-      const { userAddress, privateKey, encryptedHexString, keyHex } = req.body;
+      const { 
+        userAddress, 
+        privateKey, 
+        encryptedHexString, 
+        keyHex,
+        blobId,
+        fromWalrus = false // Flag to indicate Walrus retrieval
+      } = req.body;
 
-      if (!userAddress || !privateKey || !encryptedHexString || !keyHex) {
+      if (!userAddress || !privateKey || !keyHex) {
         res.status(400).json({
           success: false,
           decryptedData: null,
@@ -26,18 +34,14 @@ export class DecryptionController {
           ownerAddress: null,
           allowlistObjectId: null,
           processingTimeMs: null,
-          error: "Missing required fields: userAddress, privateKey, encryptedHexString, keyHex",
+          blobId: null,
+          error: "Missing required fields: userAddress, privateKey, keyHex",
           errorCode: ErrorCodes.INVALID_INPUT,
         } as ApiResponse);
         return;
       }
 
-      if (
-        typeof userAddress !== "string" ||
-        typeof privateKey !== "string" ||
-        typeof encryptedHexString !== "string" ||
-        typeof keyHex !== "string"
-      ) {
+      if (fromWalrus && !blobId) {
         res.status(400).json({
           success: false,
           decryptedData: null,
@@ -47,7 +51,25 @@ export class DecryptionController {
           ownerAddress: null,
           allowlistObjectId: null,
           processingTimeMs: null,
-          error: "All fields must be strings",
+          blobId: null,
+          error: "blobId is required when fromWalrus is true",
+          errorCode: ErrorCodes.INVALID_INPUT,
+        } as ApiResponse);
+        return;
+      }
+
+      if (!fromWalrus && !encryptedHexString) {
+        res.status(400).json({
+          success: false,
+          decryptedData: null,
+          decryptedDataHex: null,
+          decryptedText: null,
+          timestamp: null,
+          ownerAddress: null,
+          allowlistObjectId: null,
+          processingTimeMs: null,
+          blobId: null,
+          error: "encryptedHexString is required when fromWalrus is false",
           errorCode: ErrorCodes.INVALID_INPUT,
         } as ApiResponse);
         return;
@@ -66,6 +88,7 @@ export class DecryptionController {
           ownerAddress: null,
           allowlistObjectId: null,
           processingTimeMs: null,
+          blobId: null,
           error: "Invalid private key format",
           errorCode: ErrorCodes.INVALID_INPUT,
         } as ApiResponse);
@@ -82,18 +105,32 @@ export class DecryptionController {
           ownerAddress: null,
           allowlistObjectId: null,
           processingTimeMs: null,
+          blobId: null,
           error: "User address does not match the provided private key",
           errorCode: ErrorCodes.INVALID_INPUT,
         } as ApiResponse);
         return;
       }
 
-      const decryptedBytes = await this.svc.decrypt(
-        userAddress,
-        keypair,
-        encryptedHexString,
-        keyHex
-      );
+      let decryptedBytes: Uint8Array;
+
+      if (fromWalrus) {
+        // Decrypt from Walrus
+        decryptedBytes = await this.svc.decryptFromWalrus(
+          userAddress,
+          privateKey,
+          blobId,
+          keyHex
+        );
+      } else {
+        // Traditional decryption
+        decryptedBytes = await this.svc.decrypt(
+          userAddress,
+          keypair,
+          encryptedHexString,
+          keyHex
+        );
+      }
 
       const durationMs = Date.now() - start;
       const timestamp = new Date().toISOString();
@@ -120,6 +157,7 @@ export class DecryptionController {
         decryptedData: decryptedDataBase64,
         decryptedDataHex,
         decryptedText,
+        blobId: fromWalrus ? blobId : null,
         error: null,
         errorCode: null,
       } as ApiResponse);
@@ -156,6 +194,7 @@ export class DecryptionController {
         ownerAddress: null,
         allowlistObjectId: null,
         processingTimeMs: null,
+        blobId: null,
         error: msg,
         errorCode: code,
       } as ApiResponse);
