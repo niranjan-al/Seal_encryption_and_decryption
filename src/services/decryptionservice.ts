@@ -1,13 +1,12 @@
+// src/services/decryptionservice.ts
 import { SessionKey } from "@mysten/seal";
 import { suiClient, packageId, ALLOW_LIST_ID } from "../config/SuiClient";
 import { sealClient } from "../config/SealClient";
 import { TypeConversion } from "../utilities/typeconversion";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { Transaction } from "@mysten/sui/transactions";
+import { fetchFromWalrus } from "./walrusservice";
 
-/**
- * Convert hex string to Uint8Array, with optional "0x" handling
- */
 function fromHexString(hex: string): Uint8Array {
   const cleanHex = hex.startsWith("0x") ? hex.slice(2) : hex;
   const bytes = new Uint8Array(cleanHex.length / 2);
@@ -17,9 +16,6 @@ function fromHexString(hex: string): Uint8Array {
   return bytes;
 }
 
-/**
- * Wait for allowlist object to be indexed (simple polling)
- */
 async function waitForObjectIndexed(objectId: string, timeoutMs = 30000): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
@@ -37,7 +33,6 @@ export class DecryptionService {
     encryptedHexString: string,
     keyIdHex: string
   ): Promise<Uint8Array> {
-    
     // Wait until allowlist object is indexed on-chain
     await waitForObjectIndexed(ALLOW_LIST_ID);
 
@@ -89,5 +84,32 @@ export class DecryptionService {
     });
 
     return decryptedBytes;
+  }
+
+  async decryptFromWalrus(
+    userAddress: string,
+    userPrivateKey: string,
+    blobId: string,
+    keyIdHex: string
+  ): Promise<Uint8Array> {
+    // Create keypair from private key
+    const keypair = Ed25519Keypair.fromSecretKey(userPrivateKey);
+
+    // Verify the user address matches the private key
+    if (keypair.getPublicKey().toSuiAddress() !== userAddress) {
+      throw new Error("User address does not match the provided private key");
+    }
+
+    try {
+      // Fetch encrypted data from Walrus
+      const encryptedDataBytes = await fetchFromWalrus(blobId);
+      const encryptedHexString = TypeConversion.uint8ArrayToHex(encryptedDataBytes);
+
+      // Decrypt using existing decrypt method
+      return await this.decrypt(userAddress, keypair, encryptedHexString, keyIdHex);
+    } catch (error) {
+      console.error("Failed to decrypt from Walrus:", error);
+      throw new Error(`Decryption from Walrus failed: ${error}`);
+    }
   }
 }

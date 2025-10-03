@@ -26,12 +26,15 @@
     "@mysten/bcs": "^1.2.0",
     "@mysten/seal": "^0.7.0",
     "@mysten/sui": "^1.38.0",
+    "@mysten/walrus": "^0.7.0",
     "@neondatabase/serverless": "^1.0.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "drizzle-orm": "^0.44.5",
     "express": "^5.1.0",
-    "ts-node": "^10.9.0"
+    "node-fetch": "^3.3.2",
+    "ts-node": "^10.9.0",
+    "undici": "^7.16.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
